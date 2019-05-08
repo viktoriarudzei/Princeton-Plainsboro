@@ -19,7 +19,7 @@ namespace PrincetonPlainsboro.Data
 
             var departments = new Department[]
             {
-
+                new Department{}
             };
             foreach(Department de in departments)
             {
