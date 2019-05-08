@@ -12,7 +12,7 @@ namespace PrincetonPlainsboro.Models
 
         [StringLength(50)]
         [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
-        public string LastName { get; set; }
+        public string Name { get; set; }
         public string Description { get; set; }
         public string Treatment { get; set; }
     }

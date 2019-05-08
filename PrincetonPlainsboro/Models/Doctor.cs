@@ -22,7 +22,7 @@ namespace PrincetonPlainsboro.Models
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime License { get; set; }
 
-        public ICollection<Case> Ceses { get; set; }
+        public ICollection<Case> Cases { get; set; }
         public int DepartmentsId { get; set; }
         public Department Department { get; set; }
     }

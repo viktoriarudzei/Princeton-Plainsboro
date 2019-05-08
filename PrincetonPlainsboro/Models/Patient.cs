@@ -25,5 +25,7 @@ namespace PrincetonPlainsboro.Models
         public ICollection<Diagnose> Diagnoses { get; set; }
         public int CaseId { get; set; }
         public Case Case { get; set; }
+        public int DiagnoseId { get; set; }
+        public Diagnose Diagnose { get; set; }
     }
 }
