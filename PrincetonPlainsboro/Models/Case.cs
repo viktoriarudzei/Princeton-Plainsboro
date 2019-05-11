@@ -8,7 +8,7 @@ namespace PrincetonPlainsboro.Models
 {
     public class Case
     {
-        public int ID { get; set; }
+        public int CaseID { get; set; }
 
         [StringLength(50)]
         [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]

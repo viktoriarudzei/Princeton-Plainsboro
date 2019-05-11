@@ -8,7 +8,7 @@ namespace PrincetonPlainsboro.Models
 {
     public class Doctor
     {
-        public int ID { get; set; }
+        public int DoctorID { get; set; }
 
         [StringLength(50)]
         [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
@@ -23,7 +23,7 @@ namespace PrincetonPlainsboro.Models
         public DateTime License { get; set; }
 
         public ICollection<Case> Cases { get; set; }
-        public int DepartmentsId { get; set; }
+        public int DepartmentID { get; set; }
         public Department Department { get; set; }
     }
 }

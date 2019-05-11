@@ -8,7 +8,7 @@ namespace PrincetonPlainsboro.Models
 {
     public class Patient
     {
-        public int ID { get; set; }
+        public int PatientID { get; set; }
 
         [StringLength(50)]
         [RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
@@ -21,11 +21,11 @@ namespace PrincetonPlainsboro.Models
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime HospitalAdmissionDay { get; set; }
-
         public ICollection<Diagnose> Diagnoses { get; set; }
-        public int CaseId { get; set; }
-        public Case Case { get; set; }
-        public int DiagnoseId { get; set; }
-        public Diagnose Diagnose { get; set; }
+        public ICollection<Case> Cases { get; set; }
+        //public int CaseId { get; set; }
+        //public Case Case { get; set; }
+        //public int DiagnoseId { get; set; }
+        //public Diagnose Diagnose { get; set; }
     }
 }
