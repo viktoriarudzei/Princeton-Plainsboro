@@ -20,10 +20,30 @@ namespace PrincetonPlainsboro.Controllers
         }
 
         // GET: Doctors
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder)
         {
-            var hospitalContext = _context.Doctors.Include(d => d.Department);
-            return View(await hospitalContext.ToListAsync());
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            
+            var doctors = from s in _context.Doctors.Include(d => d.Department)
+                          select s;
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    doctors = doctors.OrderByDescending(s => s.LastName);
+                    break;
+                case "Date":
+                    doctors = doctors.OrderBy(s => s.License);
+                    break;
+                case "date_desc":
+                    doctors = doctors.OrderByDescending(s => s.License);
+                    break;
+                default:
+                    doctors = doctors.OrderBy(s => s.LastName);
+                    break;
+            }
+            
+            return View(await doctors.ToListAsync());
         }
 
         // GET: Doctors/Details/5
@@ -59,11 +79,21 @@ namespace PrincetonPlainsboro.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("DoctorID,LastName,FirstMidName,License,DepartmentID")] Doctor doctor)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(doctor);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(doctor);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
             }
             ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "DepartmentID", doctor.DepartmentID);
             return View(doctor);
@@ -123,7 +153,7 @@ namespace PrincetonPlainsboro.Controllers
         }
 
         // GET: Doctors/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
@@ -137,6 +167,12 @@ namespace PrincetonPlainsboro.Controllers
             {
                 return NotFound();
             }
+            if (saveChangesError.GetValueOrDefault())
+            {
+                ViewData["ErrorMessage"] =
+                    "Delete failed. Try again, and if the problem persists " +
+                    "see your system administrator.";
+            }
 
             return View(doctor);
         }
@@ -147,9 +183,22 @@ namespace PrincetonPlainsboro.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var doctor = await _context.Doctors.FindAsync(id);
-            _context.Doctors.Remove(doctor);
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (doctor == null)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+
+            try
+            {
+                _context.Doctors.Remove(doctor);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            catch (DbUpdateException /* ex */)
+            {
+                //Log the error (uncomment ex variable name and write a log.)
+                return RedirectToAction(nameof(Delete), new { id = id, saveChangesError = true });
+            }
         }
 
         private bool DoctorExists(int id)
