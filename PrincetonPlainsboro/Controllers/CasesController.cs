@@ -20,9 +20,17 @@ namespace PrincetonPlainsboro.Controllers
         }
 
         // GET: Cases
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var hospitalContext = _context.Cases.Include(i => i.Doctor).Include(p => p.Patient);
+            ViewData["CurrentFilter"] = searchString;
+
+            var hospitalContext = from s in _context.Cases.Include(i => i.Doctor).Include(p => p.Patient)
+                                  select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                hospitalContext = hospitalContext.Where(s => s.Name.Contains(searchString));
+            }
             return View(await hospitalContext.ToListAsync());
         }
 
