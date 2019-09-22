@@ -34,8 +34,29 @@ namespace PrincetonPlainsboro.Controllers
             return View(await hospitalContext.ToListAsync());
         }
 
-        // GET: Cases/Details/5
-        public async Task<IActionResult> Details(int? id)
+
+		[Route("Cases/Details/{id}.{format}")]
+
+		public async Task<IActionResult> DetailsJson(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var @case = await _context.Cases
+				.Include(i => i.Doctor)
+				.Include(i => i.Patient)
+				.FirstOrDefaultAsync(m => m.CaseID == id);
+			if (@case == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(@case);
+		}
+		// GET: Cases/Details/5
+		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -67,7 +88,7 @@ namespace PrincetonPlainsboro.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CaseID,Name,Emergency,Complete,DoctorId,PatientId")] Case @case)
+        public async Task<IActionResult> CreateJson([Bind("CaseID,Name,Emergency,Complete,DoctorId,PatientId")] Case @case)
         {
             try
             {
@@ -75,8 +96,8 @@ namespace PrincetonPlainsboro.Controllers
                 {
                     _context.Add(@case);
                     await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
+					return Ok("Everything looks fine");
+				}
             }
             catch (DbUpdateException /* ex */)
             {
@@ -87,11 +108,54 @@ namespace PrincetonPlainsboro.Controllers
             }
             ViewData["DoctorId"] = new SelectList(_context.Doctors, "DoctorID", "DoctorID", @case.DoctorId);
             ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", @case.PatientId);
-            return View(@case);
-        }
+			return Ok("Everything looks fine");
+		}
 
-        // GET: Cases/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+		//[HttpPost]
+		//[Route("Cases/Create")]
+
+		//public async Task<IActionResult> Create([Bind("CaseID,Name,Emergency,Complete,DoctorId,PatientId")] Case @case)
+		//{
+		//	try
+		//	{
+		//		if (ModelState.IsValid)
+		//		{
+		//			_context.Add(@case);
+		//			await _context.SaveChangesAsync();
+		//			return RedirectToAction(nameof(Index));
+		//		}
+		//	}
+		//	catch (DbUpdateException /* ex */)
+		//	{
+		//		//Log the error (uncomment ex variable name and write a log.
+		//		ModelState.AddModelError("", "Unable to save changes. " +
+		//			"Try again, and if the problem persists " +
+		//			"see your system administrator.");
+		//	}
+		//	ViewData["DoctorId"] = new SelectList(_context.Doctors, "DoctorID", "DoctorID", @case.DoctorId);
+		//	ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", @case.PatientId);
+		//	return View(@case);
+		//}
+
+		[Route("Cases/Edit/{id}.{format}")]
+		public async Task<IActionResult> EditJson(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var @case = await _context.Cases.FindAsync(id);
+			if (@case == null)
+			{
+				return NotFound();
+			}
+			ViewData["DoctorId"] = new SelectList(_context.Doctors, "DoctorID", "DoctorID", @case.DoctorId);
+			ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", @case.PatientId);
+			return Ok(@case);
+		}
+		// GET: Cases/Edit/5
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -145,8 +209,34 @@ namespace PrincetonPlainsboro.Controllers
             return View(@case);
         }
 
-        // GET: Cases/Delete/5
-        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
+
+		[Route("Cases/Delete/{id}.{format}")]
+		public async Task<IActionResult> DeleteJson(int? id, bool? saveChangesError = false)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var @case = await _context.Cases
+				.Include(i => i.Doctor)
+				.Include(i => i.Patient)
+				.FirstOrDefaultAsync(m => m.CaseID == id);
+			if (@case == null)
+			{
+				return NotFound();
+			}
+			if (saveChangesError.GetValueOrDefault())
+			{
+				ViewData["ErrorMessage"] =
+					"Delete failed. Try again, and if the problem persists " +
+					"see your system administrator.";
+			}
+
+			return Ok(@case);
+		}
+		// GET: Cases/Delete/5
+		public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {

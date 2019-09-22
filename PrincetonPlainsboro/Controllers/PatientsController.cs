@@ -44,8 +44,26 @@ namespace PrincetonPlainsboro.Controllers
             return View(await patients.AsNoTracking().ToListAsync());
         }
 
-        // GET: Patients/Details/5
-        public async Task<IActionResult> Details(int? id)
+
+		[Route("Patients/Details/{id}.{format}")]
+		public async Task<IActionResult> DetailsJson(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var patient = await _context.Patients
+				.FirstOrDefaultAsync(m => m.PatientID == id);
+			if (patient == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(patient);
+		}
+		// GET: Patients/Details/5
+		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -71,32 +89,72 @@ namespace PrincetonPlainsboro.Controllers
         // POST: Patients/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            [Bind("PatientID,LastName,FirstMidName,HospitalAdmissionDay")] Patient patient)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    _context.Add(patient);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch (DbUpdateException /* ex */)
-            {
-                //Log the error (uncomment ex variable name and write a log.
-                ModelState.AddModelError("", "Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
-            }
-            return View(patient);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create(
+        //    [Bind("PatientID,LastName,FirstMidName,HospitalAdmissionDay")] Patient patient)
+        //{
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            _context.Add(patient);
+        //            await _context.SaveChangesAsync();
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //    }
+        //    catch (DbUpdateException /* ex */)
+        //    {
+        //        //Log the error (uncomment ex variable name and write a log.
+        //        ModelState.AddModelError("", "Unable to save changes. " +
+        //            "Try again, and if the problem persists " +
+        //            "see your system administrator.");
+        //    }
+        //    return View(patient);
+        //}
 
-        // GET: Patients/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+		[HttpPost]
+		[Route("Doctors/Create")]
+		public async Task<IActionResult> CreateJson(
+			[Bind("PatientID,LastName,FirstMidName,HospitalAdmissionDay")] Patient patient)
+		{
+			try
+			{
+				if (ModelState.IsValid)
+				{
+					_context.Add(patient);
+					await _context.SaveChangesAsync();
+					return Ok("Everything looks fine");
+				}
+			}
+			catch (DbUpdateException /* ex */)
+			{
+				//Log the error (uncomment ex variable name and write a log.
+				ModelState.AddModelError("", "Unable to save changes. " +
+					"Try again, and if the problem persists " +
+					"see your system administrator.");
+			}
+			return Ok("Everything looks fine");
+		}
+
+
+		[Route("Patients/Edit/{id}.{format}")]
+		public async Task<IActionResult> EditJson(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var patient = await _context.Patients.FindAsync(id);
+			if (patient == null)
+			{
+				return NotFound();
+			}
+			return Ok(patient);
+		}
+		// GET: Patients/Edit/5
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -146,8 +204,32 @@ namespace PrincetonPlainsboro.Controllers
             return View(patient);
         }
 
-        // GET: Patients/Delete/5
-        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
+
+		[Route("Patients/Delete/{id}.{format}")]
+		public async Task<IActionResult> DeleteJson(int? id, bool? saveChangesError = false)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var patient = await _context.Patients
+				.FirstOrDefaultAsync(m => m.PatientID == id);
+			if (patient == null)
+			{
+				return NotFound();
+			}
+			if (saveChangesError.GetValueOrDefault())
+			{
+				ViewData["ErrorMessage"] =
+					"Delete failed. Try again, and if the problem persists " +
+					"see your system administrator.";
+			}
+
+			return Ok(patient);
+		}
+		// GET: Patients/Delete/5
+		public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {

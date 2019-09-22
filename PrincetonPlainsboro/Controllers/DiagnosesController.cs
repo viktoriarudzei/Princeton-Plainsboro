@@ -26,8 +26,26 @@ namespace PrincetonPlainsboro.Controllers
             return View(await hospitalContext.ToListAsync());
         }
 
-        // GET: Diagnoses/Details/5
-        public async Task<IActionResult> Details(int? id)
+		[Route("Diagnoses/Details/{id}.{format}")]
+		public async Task<IActionResult> DetailsJson(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var diagnose = await _context.Diagnoses
+				.Include(d => d.Patient)
+				.FirstOrDefaultAsync(m => m.DiagnoseID == id);
+			if (diagnose == null)
+			{
+				return NotFound();
+			}
+
+			return Ok(diagnose);
+		}
+		// GET: Diagnoses/Details/5
+		public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
             {
@@ -55,32 +73,74 @@ namespace PrincetonPlainsboro.Controllers
         // POST: Diagnoses/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("DiagnoseID,Name,Description,Treatment,PatientId")] Diagnose diagnose)
-        {
-            try
-            {
-                if (ModelState.IsValid)
-                {
-                    _context.Add(diagnose);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-            }
-            catch (DbUpdateException /* ex */)
-            {
-                //Log the error (uncomment ex variable name and write a log.
-                ModelState.AddModelError("", "Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
-            }
-            ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", diagnose.PatientId);
-            return View(diagnose);
-        }
+        //[HttpPost]
+        //[ValidateAntiForgeryToken]
+        //public async Task<IActionResult> Create([Bind("DiagnoseID,Name,Description,Treatment,PatientId")] Diagnose diagnose)
+        //{
+        //    try
+        //    {
+        //        if (ModelState.IsValid)
+        //        {
+        //            _context.Add(diagnose);
+        //            await _context.SaveChangesAsync();
+        //            return RedirectToAction(nameof(Index));
+        //        }
+        //    }
+        //    catch (DbUpdateException /* ex */)
+        //    {
+        //        //Log the error (uncomment ex variable name and write a log.
+        //        ModelState.AddModelError("", "Unable to save changes. " +
+        //            "Try again, and if the problem persists " +
+        //            "see your system administrator.");
+        //    }
+        //    ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", diagnose.PatientId);
+        //    return View(diagnose);
+        //}
 
-        // GET: Diagnoses/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+
+		[HttpPost]
+		[Route("Doctors/Create")]
+		public async Task<IActionResult> CreateJson([Bind("DiagnoseID,Name,Description,Treatment,PatientId")] Diagnose diagnose)
+		{
+			try
+			{
+				if (ModelState.IsValid)
+				{
+					_context.Add(diagnose);
+					await _context.SaveChangesAsync();
+					return Ok("Everything looks fine");
+				}
+			}
+			catch (DbUpdateException /* ex */)
+			{
+				//Log the error (uncomment ex variable name and write a log.
+				ModelState.AddModelError("", "Unable to save changes. " +
+					"Try again, and if the problem persists " +
+					"see your system administrator.");
+			}
+			ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", diagnose.PatientId);
+			return Ok("Everything looks fine");
+		}
+
+
+		[Route("Diagnoses/Edit/{id}.{format}")]
+		public async Task<IActionResult> EditJson(int? id)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var diagnose = await _context.Diagnoses.FindAsync(id);
+			if (diagnose == null)
+			{
+				return NotFound();
+			}
+			ViewData["PatientId"] = new SelectList(_context.Patients, "PatientID", "PatientID", diagnose.PatientId);
+			return Ok(diagnose);
+		}
+		// GET: Diagnoses/Edit/5
+		public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
             {
@@ -132,8 +192,33 @@ namespace PrincetonPlainsboro.Controllers
             return View(diagnose);
         }
 
-        // GET: Diagnoses/Delete/5
-        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
+
+		[Route("Diagnoses/Delete/{id}.{format}")]
+		public async Task<IActionResult> DeleteJson(int? id, bool? saveChangesError = false)
+		{
+			if (id == null)
+			{
+				return NotFound();
+			}
+
+			var diagnose = await _context.Diagnoses
+				.Include(d => d.Patient)
+				.FirstOrDefaultAsync(m => m.DiagnoseID == id);
+			if (diagnose == null)
+			{
+				return NotFound();
+			}
+			if (saveChangesError.GetValueOrDefault())
+			{
+				ViewData["ErrorMessage"] =
+					"Delete failed. Try again, and if the problem persists " +
+					"see your system administrator.";
+			}
+
+			return Ok(diagnose);
+		}
+		// GET: Diagnoses/Delete/5
+		public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
